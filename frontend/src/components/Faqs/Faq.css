@@ -1,0 +1,26 @@
+.faq-container {
+    padding: 20px;
+  }
+  
+  .faq-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .faq-accordion {
+    margin-top: 20px;
+  }
+  
+  .accordion-summary {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .question {
+    flex-basis: 80%;
+  }
+  
+  .answer {
+    padding-top: 10px;
+  }
+  
