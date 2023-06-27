@@ -16,6 +16,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '../CheckoutForm/CheckoutForm';
 import { ContextData } from '../../App';
+import pdfMake from 'pdfmake/build/pdfmake';
 const stripePromise = loadStripe('pk_test_51LaajgSGKYaLOMebkgLP3NYYqW3jnDPRzBYSkpctNbLwx2AvLoJ0N8oO21PrC9bNxcRPAXXgIpQ0ecCvRypl0hFo00oke2jAxs');
 const FlightDetails = ({ details }) => {
   const place=localStorage.getItem('place');
@@ -74,8 +75,62 @@ console.log(billingDetails,"billing");
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+  useEffect(()=>{
+    const generatePDF = () => {
+      const documentDefinition = {
+        content: [
+          { text: 'Booking Details', style: 'header' },
+          { text: '--------------------------\n\n', style: 'subheader' },
+          { text: `Booking ID: ${bookingData._id}` },
+          { text: `Flight Name: ${bookingData.flightId.flightName}` },
+          { text: `Passenger Name: ${bookingData.userId.email}` },
+          { text: `Departure: ${bookingData.flightId.departureTime}` },
+          { text: `Arrival: ${bookingData.flightId.arrivalTime}` },
+          { text: `Date: ${bookingData.flightId.scheduledDate}` },
+          { text: `Price: ${bookingData.amount.price/100} ${bookingData.amount.currency}` },
+          // Add more booking details as needed
+        ],
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 0, 0, 20], // top, right, bottom, left
+          },
+          subheader: {
+            fontSize: 14,
+            bold: true,
+            margin: [0, 20, 0, 10], // top, right, bottom, left
+          },
+        },
+      };
+  
+      // Generate the PDF document
+      // Download the PDF
+      const pdfDoc = pdfMake.createPdf(documentDefinition);
+      const uploadPDFToBackend = async(pdfData) => {
+          try {
+              console.log(pdfData,'1233');
+              const data= await postData('booking/upload-pdf',{pdfData,bookingId:bookingData._id});
+              console.log(data);
+              toast.success(123)
+          } catch (error) {
+              toast.error(error.message)
+          }
+         
+        };
+      // Get the data URL of the PDF
+      pdfDoc.getBase64((data) => {
+        // Send the data URL to the backend
+        console.log(63);
+        uploadPDFToBackend(data);
+      });
+    };
+    generatePDF();
+  },[bookingData])
+  
+  const [bookingData, setBookingData] = useState(null);
   const initPayment = (data) => {
-    console.log(data, 6666);
     const options = {
       key: "rzp_test_hT8Bqf0A2QaCIE",
       amount: data.amount ,
@@ -87,17 +142,21 @@ console.log(billingDetails,"billing");
       },
       handler: async (response) => {
         try {
+          
           const payload = {
             ...response,
             notes: {
               bookingId: data?.notes?.bookingId,
             },
           };
-          console.log(payload, 1234);
           const verifyUrl = "http://localhost:8540/api/payments/verify";
           const verifyResponse = await axios.post(verifyUrl, payload);
           if (verifyResponse.status == 200) {
             toast.success('Booking done successfully')
+          console.log(bookingData, 1234);
+          const storedBooking=await fetchDataWithToken(`booking/${payload.notes.bookingId}`);
+          console.log(storedBooking);
+          setBookingData(storedBooking);
             navigate('/allbookings');
           }
         } catch (error) {
@@ -124,7 +183,6 @@ console.log(billingDetails,"billing");
   // const [ticketType, setTicketType] = useState('Economy');
   const handleBooking = async (flightData) => {
     try {
-      if(place== 'india'){
         console.log(99);
         const token = localStorage.getItem('token');
         const orderUrl = "http://localhost:8540/api/booking/";
@@ -153,27 +211,14 @@ console.log(billingDetails,"billing");
             }
           });
         if (apiData.status == 201 ) {
+          console.log(5550);
           toast.success('booking Done kindly complete the payment')
           initPayment(apiData.data);
           const transactionPayload=apiData.data;
-          const storeTransaction =await postData('transaction',{...transactionPayload ,orderId:transactionPayload?.id,bookingId:transactionPayload?.notes?.bookingId})
-          
+            const storeTransaction =await postData('transaction',{...transactionPayload ,orderId:transactionPayload?.id,bookingId:transactionPayload?.notes?.bookingId})
         }
-     
-      } else{
-        const stripeLib=await stripePromise;
-        const stripePaymentIntent=await postData('stripe/payment', { items: [{ id: "xl1-tshirt" }] })
-        console.log(stripePaymentIntent);
-        setClientSecret(stripePaymentIntent?.clientSecret)
-        if(true){
-          console.log(23);
-          // navigate('/checkout')
-          // <CheckoutForm amount={200}/>
-        }
-        return null;
-      }
-        
-    } catch (error) {
+     } 
+       catch (error) {
       toast.error(error)
       console.log(error);
     }
@@ -195,10 +240,7 @@ console.log(billingDetails,"billing");
           )})}
         </Grid>
       </Grid>
-      {<Elements stripe={stripePromise}>
-          <CheckoutForm/>
-        </Elements>
-          }
+      
     </Container>
     <Footer/>
     </>

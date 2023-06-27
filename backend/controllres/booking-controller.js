@@ -4,7 +4,9 @@ const flight= require('../models/flight-model');
 const flightModel = require('../models/flight-model');
 const { default: mongoose } = require('mongoose');
 const bookingModel = require('../models/booking-model');
-
+const { uuid } = require('uuidv4');
+const fs=require('fs');
+const bookingPdfModel = require('../models/booking-pdf-model');
 const getBookingDetails = async (req,res)=>{
     try {
         const bookingId=req.params.bookingId;
@@ -19,6 +21,34 @@ const getBookingDetails = async (req,res)=>{
     }
 }
 
+const uploadPdf= async (req, res) => {
+    try {
+        const { pdfData ,bookingId} = req.body;
+    // Generate a unique filename for the PDF
+    const filename = `${uuid()}.pdf`;
+  
+    // Decode the base64 data and write it to a file
+    const fileData = Buffer.from(pdfData, 'base64');
+    fs.writeFileSync(`uploads/pdfs/${filename}`, fileData);
+        const bookingPdf=new bookingPdfModel({bookingId,userId:req.user._id,fileName:filename,filePath:`uploads/pdfs/${filename}`})
+    
+    const saveBookingPdf=await bookingPdf.save();
+     // Return the URL or link to access the PDF
+    // const pdfURL = `http://your-backend-hostname/${filename}`;
+    if(saveBookingPdf){
+        res.status(200).send('File uploaded succesful !');
+    }else{
+    res.status(405).send('File uploaded unsuccesful !');
+    }
+    } catch (error) {
+        console.log(error);
+    res.status(500).send(error);
+        
+    }
+    
+  }
+
+
 const getAllBookings = async (req,res)=>{
     try {
         const flightId=req.body?.flightId;
@@ -30,6 +60,24 @@ const getAllBookings = async (req,res)=>{
         res.status(204).send('No bookings Found !');
     }
 } catch (error) {
+        res.status(500).send(error)
+        
+    }
+    
+}
+
+const getBookingPdf = async (req,res)=>{
+    try {
+        const bookingId=req.params.bookingId
+        const userId=req?.user._id;
+    const bookingData=await bookingPdfModel.findOne({bookingId:bookingId});
+    if(bookingData){
+        res.status(200).send(bookingData);
+    } else if(!bookingData){
+        res.status(204).send('No bookings Found !');
+    }
+} catch (error) {
+    console.log(error);
         res.status(500).send(error)
         
     }
@@ -88,4 +136,4 @@ const updateFlight =async (req,res) =>{
 }
 
 
-module.exports={getBookingDetails,getAllBookings,addBooking,deleteBooking,updateFlight}
+module.exports={getBookingDetails,getAllBookings,addBooking,deleteBooking,updateFlight,uploadPdf,getBookingPdf}

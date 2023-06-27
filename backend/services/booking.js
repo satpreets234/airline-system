@@ -23,13 +23,13 @@ const getAllBookings = async (userId='',flightId='') =>{
         let bookingDetails;
         if(!userId){
              bookingDetails= await bookingModel.find({flightId})
-            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId');
+            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId').sort({dateCreated:-1});
         } else if(!flightId){
              bookingDetails= await bookingModel.find({userId})
-            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId');
+            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId').sort({dateCreated:-1});;
         } else {
              bookingDetails= await bookingModel.find({})
-            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId');
+            .populate('flightId').populate('userId',' _id email userType ').populate('transactionId').sort({dateCreated:-1});;
         }
         if(bookingDetails){
             return bookingDetails;

@@ -2,6 +2,8 @@ const crypto=require('crypto');
 const bookingModel = require('../models/booking-model');
 const successfulBookingTemplate=require('../templates/successful-booking');
 const { sendMail ,transporter} = require('../services/node-mail');
+const bookingPdfModel = require('../models/booking-pdf-model');
+const axios=require('axios');
 const completePayment = async(req,res) =>{
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const sign= razorpay_order_id + '|' + razorpay_payment_id;
@@ -16,13 +18,14 @@ const completePayment = async(req,res) =>{
             var mailOptions = {
                 from: process.env.NODEMAILER_EMAIL,
                 to: bookingData?.userId?.email,
-                subject: `Flight Booking successful `,
+                subject: `Flight Booking successful`,
                 html: successfulBookingTemplate(bookingData)
             };
             const mailDetails= await sendMail(transporter,mailOptions);
 
             return res.status(200).json({ message: "Payment verified successfully" });  
         } catch (error) {
+            console.log(error);
             return res.status(403).send(error)
        }
     } else {

@@ -19,6 +19,7 @@ app.use(cors({ origin: "*" }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 connection()
 app.use("/api/user", userRouter);
+app.use("/api/migration", require('./routers/migration-router'));
 app.use("/api/flight", flightRouter);
 app.use("/api/booking", bookingRouter);
 app.use("/api/payments", paymentRouter);

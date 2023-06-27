@@ -1,4 +1,4 @@
-const successBooking =(payload) =>{
+const successBooking =(payload,pdfLink) =>{
     return `<!DOCTYPE html>
     <html>
       <head>
@@ -47,7 +47,8 @@ const successBooking =(payload) =>{
           <li><strong>Number of Seats:</strong> ${payload.seatDetails?.seatCount}</li>
           <li><strong>Amount:</strong> ${payload.amount?.price/100}</li>
         </ul>
-        
+        <h2>Invoice Pdf Link</h2>
+        <p><a>http://localhost:8540/${pdfLink}</a></p>
         <p>Thank you for choosing our flight booking service. If you have any further questions or need assistance, please feel free to contact our customer support.</p>
         
         <p>Best regards,</p>

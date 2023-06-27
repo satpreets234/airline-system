@@ -8,6 +8,8 @@ router.get('/with-toke/:bookingId',bookingController.getBookingDetails)
 router.use(authMiddleware.authenticateUserToken)
 router.get('/:bookingId',bookingController.getBookingDetails)
 router.get('/',bookingController.getAllBookings);
+router.get('/booking-pdf/:bookingId',bookingController.getBookingPdf);
+router.post('/upload-pdf',bookingController.uploadPdf);
 router.delete('/:bookingId',bookingController.deleteBooking)
 router.post('/',bookingController.addBooking)
 

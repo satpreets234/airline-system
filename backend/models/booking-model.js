@@ -66,7 +66,11 @@ const booking= new Schema({
     transactionId:{
         type:Types.ObjectId,
         ref:'transaction'
+    },
+    dateCreated:{
+        type:Date,
+        default:Date.now()
     }
-})
+},{timestamps:true})
 
 module.exports= mongoose.model('bookings',booking)
