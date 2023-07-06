@@ -44,7 +44,9 @@ const FlightDetails = ({ details }) => {
     checkAuth();
   }, [])
   let token = localStorage.getItem('token');
-  const [sortOrder, setSortOrder] = useState('ao')
+  const [sortOrder, setSortOrder] = useState('ao');
+  const [bookingData, setBookingData] = useState(null);
+
   useEffect(() => {
     async function getAllFlights() {
       const flightsDetails = await axios.get(
@@ -126,10 +128,11 @@ console.log(billingDetails,"billing");
         uploadPDFToBackend(data);
       });
     };
-    generatePDF();
+    if(bookingData){
+      generatePDF();
+    }
   },[bookingData])
   
-  const [bookingData, setBookingData] = useState(null);
   const initPayment = (data) => {
     const options = {
       key: "rzp_test_hT8Bqf0A2QaCIE",

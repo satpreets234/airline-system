@@ -86,7 +86,6 @@ export const initPayment = async(data,bookingDetails) => {
       uploadPDFToBackend(data);
     });
   };
-   generatePDF()
   const options = {
     key: "rzp_test_hT8Bqf0A2QaCIE",
     amount: data.amount ,
@@ -108,6 +107,7 @@ export const initPayment = async(data,bookingDetails) => {
         const verifyResponse = await axios.post(verifyUrl, payload);
         if (verifyResponse.status == 200) {
           toast.success('Booking done successfully')
+          generatePDF()
           window.location.href = '/allbookings';
         }
       } catch (error) {
